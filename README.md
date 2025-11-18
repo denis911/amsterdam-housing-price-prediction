@@ -5,7 +5,7 @@
 [![Docker](https://img.shields.io/badge/Docker-enabled-2496ED)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-> **ML Zoomcamp 2024 Capstone Project**  
+> **ML Zoomcamp 2025 Mid Term Project**  
 > A complete machine learning pipeline for predicting Amsterdam house prices using XGBoost and deployed as a production-ready REST API service.
 
 ---
