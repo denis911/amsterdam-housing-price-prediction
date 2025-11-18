@@ -78,7 +78,5 @@ def predict(input: HouseInput):
 # curl -X POST -H "Content-Type: application/json" -d "{\"pc4\":\"1092\", \"area\":67, \"room\":3}" http://localhost:9696/predict
 
 # You should receive something like:
-# {
-#   "predicted_price": 462381.72
-# }
+# {"predicted_price":457836.8125}
 
