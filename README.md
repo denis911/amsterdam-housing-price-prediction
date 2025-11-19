@@ -42,11 +42,11 @@ Buying a house in Amsterdam is a significant financial decision, and determining
 
 **Business Value:**
 - Helps potential buyers make data-driven decisions
-- Assists real estate agents in property valuation
+- Can assist sellers and real estate agents in property valuation
 - Provides price estimates for properties based on location, size, and room count
 
 **Target Audience:**
-- Home buyers looking for fair market prices
+- Home buyers looking for ballpark market prices
 - Real estate professionals
 - Property investors
 
@@ -87,7 +87,7 @@ The dataset contains real estate listings in Amsterdam with asking prices and pr
 
 **Dataset Statistics:**
 - Total records: ~924 properties
-- Missing values: Present in some rows (handled during preprocessing)
+- Missing values: Present in 4 rows (handled during preprocessing)
 - Target variable: `Price` (continuous)
 
 **Feature Engineering:**
@@ -218,15 +218,12 @@ The dataset contains real estate listings in Amsterdam with asking prices and pr
 ```
 amsterdam-housing-price-prediction/
 │
-├── data/
-│   └── HousingPrices-Amsterdam-August-2021.csv   # Raw dataset
+├── HousingPrices-Amsterdam-August-2021.csv   # Raw dataset
 │
 ├── notebooks/
 │   └── notebook.ipynb                            # EDA & model training
 │
-├── models/
-│   ├── model.pkl                                 # Trained XGBoost model
-│   └── dv.pkl                                    # DictVectorizer for feature transformation
+├── Ams_xgb_pipeline.pkl                          # Trained XGBoost model and data vectorizer
 │
 ├── src/
 │   ├── train.py                                  # Model training script
