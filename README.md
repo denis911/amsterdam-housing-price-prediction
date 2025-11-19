@@ -238,8 +238,6 @@ amsterdam-housing-price-prediction/
 ├── Dockerfile                                     # Docker containerization
 │
 ├── README.md                                      # This file
-├── README v1.md                                   # Old README (v1)
-├── README v2.md                                   # Old README (v2)
 ├── .gitignore                                     # Git ignore patterns
 └── .python-version                                # Python version specification
 ```
@@ -333,12 +331,6 @@ pytest==7.4.3
 
 1. Go to [Kaggle Dataset Page](https://www.kaggle.com/datasets/thomasnibb/amsterdam-house-price-prediction/data)
 2. Download `HousingPrices-Amsterdam-August-2021.csv`
-3. Place it in the `data/` directory
-
-```bash
-mkdir -p data
-# Place downloaded CSV in data/ folder
-```
 
 ---
 
