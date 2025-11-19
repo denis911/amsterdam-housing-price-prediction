@@ -28,12 +28,9 @@
 - [Model Performance](#-model-performance)
 - [Running the Service](#-running-the-service)
 - [API Usage](#-api-usage)
-- [Testing](#-testing)
 - [Reproducibility](#-reproducibility)
 - [Future Improvements](#-future-improvements)
 - [Acknowledgments](#-acknowledgments)
-- [License](#-license)
-- [Contact](#-contact)
 
 ---
 
@@ -385,7 +382,7 @@ Price Statistics:
 - Median: €425,000
 - Std Dev: €219,841
 - Min: €175,000
-- Max: €1,850,000
+- Max: €5,950,000
 ```
 
 **Distribution:** Right-skewed (log transformation applied to stabilize variance)
@@ -395,33 +392,21 @@ Price Statistics:
 **Area (square meters):**
 - Range: 20-250 m²
 - Most properties: 50-100 m²
-- Strong positive correlation with price
 
 **Rooms:**
 - Range: 1-6 rooms
 - Most properties: 2-3 rooms
-- Moderate positive correlation with price
 
 **PC4 (Postal Code Districts):**
 - 100+ unique districts
 - Central districts (e.g., 1011-1020) command higher prices
 - Encoded as categorical one-hot features
 
-### 4. Correlation Analysis
+### 4. Key Insights
 
-```
-Feature Correlation with Price:
-- Area:   +0.72  (strong positive)
-- Room:   +0.58  (moderate positive)
-- PC4:    varies by district
-```
-
-### 5. Key Insights
-
-- **Location matters:** Postal codes significantly impact prices
-- **Size is key:** Area has the strongest linear relationship with price
+- **Location matters:** Postal codes -> location -> impact prices
+- **Size is key:** Area has the strongest relationship with price
 - **Outliers present:** Some luxury properties with prices > €1.5M
-- **No multicollinearity:** Features are relatively independent
 
 ---
 
@@ -429,7 +414,7 @@ Feature Correlation with Price:
 
 ### Training Process
 
-The model training pipeline is implemented in `src/train.py` and consists of:
+The model training pipeline is implemented in `train.py` and consists of:
 
 #### 1. Data Preprocessing
 ```python
@@ -458,7 +443,7 @@ X_train, X_val, y_train, y_val = train_test_split(
     df[features], 
     df[target],
     test_size=0.2,
-    random_state=42
+    random_state=1
 )
 ```
 
@@ -472,8 +457,8 @@ val_dicts = X_val.to_dict(orient='records')
 
 # One-hot encode categorical features
 dv = DictVectorizer(sparse=False)
-X_train_transformed = dv.fit_transform(train_dicts)
-X_val_transformed = dv.transform(val_dicts)
+X_full_train = dv.fit_transform(full_train_dicts)
+X_test = dv.transform(test_dicts)
 ```
 
 #### 4. Model Candidates
@@ -501,7 +486,7 @@ best_params = {
     'colsample_bytree': 0.8,     # Column sampling
     'objective': 'reg:squarederror',
     'eval_metric': 'rmse',
-    'seed': 42
+    'seed': 1
 }
 
 # Train model
@@ -511,7 +496,7 @@ dval = xgb.DMatrix(X_val_transformed, label=y_val)
 model = xgb.train(
     params=best_params,
     dtrain=dtrain,
-    num_boost_round=200,
+    num_boost_round=100,
     evals=[(dval, 'validation')],
     early_stopping_rounds=20,
     verbose_eval=False
@@ -523,13 +508,18 @@ model = xgb.train(
 ```python
 import pickle
 
-# Save model
-with open('models/model.pkl', 'wb') as f:
-    pickle.dump(model, f)
+# STEP 3 - pickle model and dv together
 
-# Save DictVectorizer
-with open('models/dv.pkl', 'wb') as f:
-    pickle.dump(dv, f)
+#  dv = trained DictVectorizer
+#  model = trained XGBoost Booster model
+
+data_to_save = {
+    "dv": dv,
+    "model": model
+}
+
+with open("Ams_xgb_pipeline.pkl", "wb") as f:
+    pickle.dump(data_to_save, f)
 ```
 
 ### Running Training Script
@@ -541,21 +531,12 @@ source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate     # Windows
 
 # Run training
-python src/train.py
+python train.py
 ```
 
 **Output:**
 ```
-Loading data...
-Preprocessing...
-Training models...
-- Linear Regression RMSE: 0.2301
-- Ridge Regression RMSE: 0.2198
-- Random Forest RMSE: 0.2087
-- XGBoost RMSE: 0.1923 ✓ (Best)
-
-Saving model and DictVectorizer...
-Training complete!
+ RMSE: 0.1923 
 ```
 
 ---
@@ -564,44 +545,12 @@ Training complete!
 
 ### Final Model: XGBoost Regressor
 
-**Performance Metrics on Validation Set:**
+**Performance Metrics on Test Set:**
 
 | Metric                  | Value          |
 |-------------------------|----------------|
 | **RMSE (log scale)**    | 0.19           |
-| **RMSE (€)**            | ~€87,000       |
-| **R² Score**            | 0.83           |
-| **Mean Absolute Error** | ~€62,000       |
 
-### Interpretation
-
-- **RMSE of €87,000:** On average, predictions are within €87k of actual prices
-- **R² = 0.83:** Model explains 83% of variance in housing prices
-- **No overfitting:** Training and validation RMSE are comparable
-
-### Error Analysis
-
-**Residual Distribution:**
-- Most predictions within ±€100k of actual price
-- Larger errors for luxury properties (>€1M)
-- Consistent performance across price ranges
-
-**Feature Importance:**
-```
-Top 5 Most Important Features:
-1. Area              (38% importance)
-2. PC4: 1011-1020    (22% importance)
-3. PC4: 1091-1095    (12% importance)
-4. Room              (10% importance)
-5. PC4: Other        (18% importance)
-```
-
-### Model Validation
-
-The model was validated using:
-- **Hold-out validation set** (20% of data)
-- **Cross-validation** (5-fold) during hyperparameter tuning
-- **Manual test cases** to check prediction reasonableness
 
 ---
 
@@ -661,9 +610,7 @@ curl http://localhost:9696/health
 **Response:**
 ```json
 {
-  "status": "ok",
-  "model": "XGBoost",
-  "version": "1.0"
+  "status": "ok"
 }
 ```
 
@@ -687,9 +634,7 @@ curl http://localhost:9696/health
 **Response:**
 ```json
 {
-  "status": "ok",
-  "model": "XGBoost",
-  "version": "1.0"
+  "status": "ok"
 }
 ```
 
@@ -713,8 +658,7 @@ curl http://localhost:9696/health
 **Response:**
 ```json
 {
-  "predicted_price": 462381.72,
-  "currency": "EUR"
+  "predicted_price": 462381.72
 }
 ```
 
@@ -738,7 +682,7 @@ property_1 = {
 
 response = requests.post(url, json=property_1)
 print(response.json())
-# Output: {"predicted_price": 385000.45, "currency": "EUR"}
+# Output: {"predicted_price": 385000.45}
 
 # Example 2: Large house in residential area
 property_2 = {
@@ -806,88 +750,6 @@ fetch(url, {
 - `pc4` (string): 4-digit postal code
 - `area` (integer): Property size in m² (must be > 0)
 - `room` (integer): Number of rooms (must be > 0)
-
-**Error handling:**
-```json
-{
-  "detail": [
-    {
-      "loc": ["body", "area"],
-      "msg": "ensure this value is greater than 0",
-      "type": "value_error"
-    }
-  ]
-}
-```
-
----
-
-## 🧪 Testing
-
-### Unit Tests
-
-The project includes unit tests for prediction logic in `tests/test_predict.py`.
-
-#### Running Tests
-
-```bash
-# Activate virtual environment
-source venv/bin/activate
-
-# Run all tests
-pytest tests/ -v
-```
-
-**Sample test:**
-```python
-import pytest
-from src.serve import predict_price
-
-def test_predict_typical_property():
-    """Test prediction for typical Amsterdam property"""
-    input_data = {
-        "pc4": "1092",
-        "area": 67,
-        "room": 3
-    }
-    
-    result = predict_price(input_data)
-    
-    assert 300000 < result < 700000, "Price should be in reasonable range"
-    assert isinstance(result, float), "Result should be a float"
-
-def test_predict_luxury_property():
-    """Test prediction for luxury property"""
-    input_data = {
-        "pc4": "1011",
-        "area": 200,
-        "room": 6
-    }
-    
-    result = predict_price(input_data)
-    
-    assert result > 800000, "Luxury property should have high price"
-```
-
-#### Manual Testing
-
-**Test case 1: Central Amsterdam apartment**
-```json
-{"pc4": "1012", "area": 55, "room": 2}
-Expected: €400k-€550k
-```
-
-**Test case 2: Residential house**
-```json
-{"pc4": "1092", "area": 120, "room": 4}
-Expected: €600k-€800k
-```
-
-**Test case 3: Studio apartment**
-```json
-{"pc4": "1078", "area": 30, "room": 1}
-Expected: €250k-€350k
-```
 
 ---
 
