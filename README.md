@@ -1,12 +1,13 @@
 # Amsterdam Housing Price Prediction 🏠
 
-[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-009688)](https://fastapi.tiangolo.com/)
+[![Python Version](https://img.shields.io/badge/python-3.14%2B-blue)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.121.2%2B-009688)](https://fastapi.tiangolo.com/)
+[![UV](https://img.shields.io/badge/UV-0.5%2B-0F6B35)](https://docs.astral.sh/uv/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-3.1.1%2B-red)](https://xgboost.readthedocs.io/)
 [![Docker](https://img.shields.io/badge/Docker-enabled-2496ED)](https://www.docker.com/)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 > **ML Zoomcamp 2025 Mid Term Project**  
-> A complete machine learning pipeline for predicting Amsterdam house prices using XGBoost and deployed as a production-ready REST API service.
+> Predict Amsterdam house prices using XGBoost ML model, served as a REST API web service.
 
 ---
 
@@ -218,24 +219,29 @@ The dataset contains real estate listings in Amsterdam with asking prices and pr
 ```
 amsterdam-housing-price-prediction/
 │
-├── HousingPrices-Amsterdam-August-2021.csv   # Raw dataset
-│
-├── notebooks/
-│   └── notebook.ipynb                            # EDA & model training
-│
+├── HousingPrices-Amsterdam-August-2021.csv       # Raw dataset
 ├── Ams_xgb_pipeline.pkl                          # Trained XGBoost model and data vectorizer
 │
-├── src/
-│   ├── train.py                                  # Model training script
-│   └── serve.py                                  # FastAPI prediction service
+├── Data prep.ipynb                                # Data preparation notebook
+├── Predict using XGB model.ipynb                 # Prediction notebook
+├── training pipeline.ipynb                       # Model training notebook
+├── web service tests.ipynb                       # Service testing notebook
 │
-├── tests/
-│   └── test_predict.py                           # Unit tests for predictions
+├── main.py                                        # Main script
+├── predict.py                                     # Prediction script
+├── train.py                                       # Training script
+├── serve.py                                       # FastAPI service
 │
-├── Dockerfile                                    # Docker container configuration
-├── requirements.txt                              # Python dependencies
-├── README.md                                     # This file
-└── .gitignore                                    # Git ignore patterns
+├── pyproject.toml                                 # Project dependencies (UV)
+├── requirements.txt                               # Alternative requirements
+├── uv.lock                                        # UV lock file
+├── Dockerfile                                     # Docker containerization
+│
+├── README.md                                      # This file
+├── README v1.md                                   # Old README (v1)
+├── README v2.md                                   # Old README (v2)
+├── .gitignore                                     # Git ignore patterns
+└── .python-version                                # Python version specification
 ```
 
 ---
@@ -267,8 +273,8 @@ amsterdam-housing-price-prediction/
 
 Before you begin, ensure you have the following installed:
 
-- **Python 3.11 or higher** ([Download](https://www.python.org/downloads/))
-- **pip** (comes with Python)
+- **Python 3.14 or higher** ([Download](https://www.python.org/downloads/))
+- **UV** (recommended for dependency management) ([Installation Guide](https://docs.astral.sh/uv/getting-started/installation/))
 - **Git** ([Download](https://git-scm.com/downloads))
 - **Docker** (optional, for containerized deployment) ([Download](https://www.docker.com/get-started))
 
@@ -297,6 +303,12 @@ venv\Scripts\activate
 
 #### Step 3: Install Dependencies
 
+**Option 1: Using UV (Recommended)**
+```bash
+uv sync
+```
+
+**Option 2: Using pip**
 ```bash
 pip install --upgrade pip
 pip install -r requirements.txt
